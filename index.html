@@ -29,9 +29,6 @@ h1 {
 }
 
 #countdown-container {
-  display:flex;
-  justify-content:center;
-  align-items:center;
   margin-bottom:1em;
 }
 
@@ -59,10 +56,11 @@ button { background:#fff; color:#ff6a95; font-weight:bold; cursor:pointer; }
 button:hover { background:#ff6a95; color:#fff; }
 
 #muteBtn {
-  position: relative;
-  margin-left:10px;
-  display:inline-block;
-  vertical-align:middle;
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: inline-block;
+  z-index:1;
 }
 
 canvas { position:absolute; top:0; left:0; z-index:0; pointer-events:none; }
@@ -80,11 +78,12 @@ canvas { position:absolute; top:0; left:0; z-index:0; pointer-events:none; }
 <div id="content">
   <div id="countdown-container">
     <p id="countdown"></p>
-    <button id="muteBtn">🔊 Mute</button>
   </div>
   <input id="nameInput" placeholder="Type your name">
   <button id="celebrateBtn">Celebrate!</button>
 </div>
+
+<button id="muteBtn">🔊 Mute</button>
 
 <audio id="bgMusic" loop>
   <source src="music.mp3" type="audio/mpeg">
