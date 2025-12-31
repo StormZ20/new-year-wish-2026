@@ -56,12 +56,12 @@ canvas { position:absolute; top:0; left:0; z-index:0; pointer-events:none; }
   <button id="muteBtn">🔊 Mute</button>
 </div>
 
+<!-- Use your own music file here -->
 <audio id="bgMusic" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d1c46c9c5.mp3?filename=happy-new-year-joyful-music-12711.mp3" type="audio/mpeg">
+  <source src="music.mp3" type="audio/mpeg">
 </audio>
 
 <canvas id="confetti"></canvas>
-<canvas id="fireworks"></canvas>
 
 <script>
 // ===== Music & Mute =====
@@ -81,16 +81,11 @@ document.getElementById('startBtn').addEventListener('click', ()=>{
 });
 
 // ===== Countdown Timer =====
-let fireworksTriggered = false;
 function updateCountdown() {
   const newYear = new Date('Jan 1, 2026 00:00:00').getTime();
   const now = new Date().getTime();
   const diff = newYear - now;
-  if(diff<=0){
-    document.getElementById('countdown').innerText="🎊 Happy 2026! 🎊";
-    if(!fireworksTriggered){ fireworkInterval(); fireworksTriggered=true;}
-    return;
-  }
+  if(diff<0){ document.getElementById('countdown').innerText="🎊 Happy 2026! 🎊"; return; }
   const days=Math.floor(diff/(1000*60*60*24));
   const hours=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
   const minutes=Math.floor((diff%(1000*60*60))/(1000*60));
@@ -107,64 +102,33 @@ document.getElementById('celebrateBtn').addEventListener('click', ()=>{
 });
 
 // ===== Confetti =====
-const confettiCanvas=document.getElementById('confetti');
-const confCtx=confettiCanvas.getContext('2d');
-confettiCanvas.width=window.innerWidth;
-confettiCanvas.height=window.innerHeight;
+const canvas=document.getElementById('confetti');
+const ctx=canvas.getContext('2d');
+canvas.width=window.innerWidth;
+canvas.height=window.innerHeight;
 const confettiPieces=[];
 for(let i=0;i<150;i++){
   confettiPieces.push({
-    x:Math.random()*confettiCanvas.width,
-    y:Math.random()*confettiCanvas.height,
+    x:Math.random()*canvas.width,
+    y:Math.random()*canvas.height,
     size:Math.random()*5+5,
     speed:Math.random()*2+1,
     color:['#ff6a95','#ffe066','#6a8cff','#ff9a9e','#a0e7e5'][Math.floor(Math.random()*5)]
   });
 }
 function animateConfetti(){
-  confCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
+  ctx.clearRect(0,0,canvas.width,canvas.height);
   confettiPieces.forEach(p=>{
-    confCtx.fillStyle=p.color;
-    confCtx.fillRect(p.x,p.y,p.size,p.size);
+    ctx.fillStyle=p.color;
+    ctx.fillRect(p.x,p.y,p.size,p.size);
     p.y+=p.speed;
-    if(p.y>confettiCanvas.height){p.y=0; p.x=Math.random()*confettiCanvas.width;}
+    if(p.y>canvas.height){p.y=0; p.x=Math.random()*canvas.width;}
   });
   requestAnimationFrame(animateConfetti);
 }
 animateConfetti();
 
-// ===== Fireworks =====
-const fwCanvas=document.getElementById('fireworks');
-const fwCtx=fwCanvas.getContext('2d');
-fwCanvas.width=window.innerWidth;
-fwCanvas.height=window.innerHeight;
-
-class Particle{
-  constructor(x,y,color){
-    this.x=x; this.y=y; this.color=color;
-    this.vx=Math.random()*6-3; this.vy=Math.random()*-5-1; this.alpha=1;
-  }
-  update(){ this.x+=this.vx; this.y+=this.vy; this.alpha-=0.02; }
-  draw(){ fwCtx.globalAlpha=this.alpha; fwCtx.fillStyle=this.color; fwCtx.fillRect(this.x,this.y,4,4); }
-}
-let particles=[];
-function createFirework(){
-  const x=Math.random()*fwCanvas.width;
-  const y=Math.random()*fwCanvas.height/2;
-  const colors=['#ff6a95','#ffe066','#6a8cff','#ff9a9e','#a0e7e5'];
-  for(let i=0;i<50;i++) particles.push(new Particle(x,y,colors[Math.floor(Math.random()*colors.length)]));
-}
-function animateFireworks(){
-  fwCtx.fillStyle='rgba(0,0,0,0.1)';
-  fwCtx.fillRect(0,0,fwCanvas.width,fwCanvas.height);
-  particles.forEach((p,i)=>{ p.update(); p.draw(); if(p.alpha<=0) particles.splice(i,1); });
-  requestAnimationFrame(animateFireworks);
-}
-animateFireworks();
-function fireworkInterval(){ setInterval(createFirework,500); }
-
-// ===== Resize =====
-window.addEventListener('resize',()=>{confettiCanvas.width=fwCanvas.width=window.innerWidth; confettiCanvas.height=fwCanvas.height=window.innerHeight;});
+window.addEventListener('resize',()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight;});
 </script>
 
 </body>
