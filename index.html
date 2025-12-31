@@ -5,115 +5,166 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Happy New Year 2026!</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; padding: 0; overflow: hidden;
-    display: flex; justify-content: center; align-items: center; flex-direction: column;
-    height: 100vh; background: linear-gradient(to right, #ff9a9e, #fad0c4, #ffd6a5);
-    font-family: 'Pacifico', cursive; color: #fff; text-align: center;
-  }
-  h1 { font-size: 3em; margin: 0.2em; text-shadow: 2px 2px 8px #000; position: relative; z-index:1; }
-  p { font-size: 2em; text-shadow: 2px 2px 8px #000; position: relative; z-index:1; }
-  input { padding: 8px; font-size: 1em; border-radius: 8px; border: none; margin-top: 10px; position: relative; z-index:1; }
-  button { padding: 10px 20px; margin-top: 10px; font-size: 1em; border-radius: 10px; border: none; cursor: pointer; background: #fff; color: #ff6a95; font-weight: bold; position: relative; z-index:1; }
-  button:hover { background: #ff6a95; color: #fff; }
-  #muteBtn { position: absolute; top: 20px; right: 20px; z-index:1; }
-  canvas { position: absolute; top:0; left:0; z-index:0; pointer-events:none; }
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+  font-family: 'Pacifico', cursive;
+  text-align: center;
+  background: linear-gradient(to right,#ff9a9e,#fad0c4,#ffd6a5);
+  color:#fff;
+  overflow:hidden;
+  height:100vh;
+}
+h1 {
+  font-size:3em;
+  text-shadow:2px 2px 8px #000;
+  position:relative; z-index:1;
+}
+p#countdown {
+  font-size:2.5em;
+  text-shadow: 0 0 15px #fff, 0 0 25px #ff6a95, 0 0 35px #ff6a95, 0 0 50px #ff6a95;
+  animation: glow 1.5s infinite alternate;
+  position: relative; z-index:1;
+}
+@keyframes glow {
+  from { text-shadow: 0 0 10px #fff, 0 0 20px #ff6a95, 0 0 30px #ff6a95; }
+  to { text-shadow: 0 0 20px #fff, 0 0 30px #ff6a95, 0 0 50px #ff6a95; }
+}
+input, button {
+  padding:10px; margin:10px; border-radius:10px; border:none; font-size:1em;
+  position:relative; z-index:1;
+}
+button { background:#fff; color:#ff6a95; font-weight:bold; cursor:pointer; }
+button:hover { background:#ff6a95; color:#fff; }
+#muteBtn { position:absolute; top:20px; right:20px; z-index:1; }
+canvas { position:absolute; top:0; left:0; z-index:0; pointer-events:none; }
+#content { display:none; position:relative; z-index:1; }
 </style>
 </head>
 <body>
 
-<h1 id="greeting">🎉 Happy New Year 2026! 🎉</h1>
-<p id="countdown">Loading countdown...</p>
+<h1>🎉 Happy New Year 2026! 🎉</h1>
 
-<input id="nameInput" placeholder="Type your name">
-<button id="celebrateBtn">Celebrate!</button>
+<div id="startScreen">
+  <button id="startBtn">Start Celebration & Play Music</button>
+</div>
 
-<button id="muteBtn" onclick="toggleMusic()">🔊 Mute</button>
+<div id="content">
+  <p id="countdown"></p>
+  <input id="nameInput" placeholder="Type your name">
+  <button id="celebrateBtn">Celebrate!</button>
+  <button id="muteBtn">🔊 Mute</button>
+</div>
 
 <audio id="bgMusic" loop>
   <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d1c46c9c5.mp3?filename=happy-new-year-joyful-music-12711.mp3" type="audio/mpeg">
 </audio>
 
 <canvas id="confetti"></canvas>
+<canvas id="fireworks"></canvas>
 
 <script>
+// ===== Music & Mute =====
+const music = document.getElementById('bgMusic');
+let muted = false;
+document.getElementById('muteBtn').addEventListener('click', ()=>{
+  muted = !muted;
+  music.muted = muted;
+  document.getElementById('muteBtn').innerText = muted ? "🔇 Unmute" : "🔊 Mute";
+});
+
+// ===== Start Celebration Button =====
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  music.play().catch(()=>{});
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('content').style.display='block';
+});
+
 // ===== Countdown Timer =====
+let fireworksTriggered = false;
 function updateCountdown() {
   const newYear = new Date('Jan 1, 2026 00:00:00').getTime();
   const now = new Date().getTime();
   const diff = newYear - now;
-  if (diff < 0) { document.getElementById('countdown').innerText = "🎊 Happy 2026! 🎊"; return; }
-  const days = Math.floor(diff / (1000*60*60*24));
-  const hours = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
-  const minutes = Math.floor((diff%(1000*60*60))/(1000*60));
-  const seconds = Math.floor((diff%(1000*60))/1000);
-  document.getElementById('countdown').innerText = `Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+  if(diff<=0){
+    document.getElementById('countdown').innerText="🎊 Happy 2026! 🎊";
+    if(!fireworksTriggered){ fireworkInterval(); fireworksTriggered=true;}
+    return;
+  }
+  const days=Math.floor(diff/(1000*60*60*24));
+  const hours=Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+  const minutes=Math.floor((diff%(1000*60*60))/(1000*60));
+  const seconds=Math.floor((diff%(1000*60))/1000);
+  document.getElementById('countdown').innerText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
-setInterval(updateCountdown, 1000);
+setInterval(updateCountdown,1000);
 updateCountdown();
 
-// ===== Music Control =====
-const music = document.getElementById('bgMusic');
-let musicStarted = false;
-let muted = false;
-
-function toggleMusic(){
-  if (!musicStarted) music.play().catch(()=>{});
-  muted = !muted;
-  music.muted = muted;
-  document.getElementById('muteBtn').innerText = muted ? "🔇 Unmute" : "🔊 Mute";
-}
-
-// ===== Personal Greeting + Start Music =====
+// ===== Personalized Greeting =====
 document.getElementById('celebrateBtn').addEventListener('click', ()=>{
-  // Start music on first interaction
-  if(!musicStarted){
-    music.play().catch(()=>{});
-    musicStarted = true;
-  }
-  // Update greeting
   const name = document.getElementById('nameInput').value;
-  if(name) document.getElementById('greeting').innerText = `🎉 Happy New Year 2026, ${name}! 🎉`;
+  if(name) document.querySelector('h1').innerText=`🎉 Happy New Year 2026, ${name}! 🎉`;
 });
 
 // ===== Confetti =====
-const confettiCanvas = document.getElementById('confetti');
-const confCtx = confettiCanvas.getContext('2d');
-confettiCanvas.width = window.innerWidth;
-confettiCanvas.height = window.innerHeight;
-
-function random(min,max){return Math.random()*(max-min)+min;}
-
-const confettiPieces = [];
+const confettiCanvas=document.getElementById('confetti');
+const confCtx=confettiCanvas.getContext('2d');
+confettiCanvas.width=window.innerWidth;
+confettiCanvas.height=window.innerHeight;
+const confettiPieces=[];
 for(let i=0;i<150;i++){
   confettiPieces.push({
     x:Math.random()*confettiCanvas.width,
     y:Math.random()*confettiCanvas.height,
-    size:random(5,10),
-    speed:random(1,3),
+    size:Math.random()*5+5,
+    speed:Math.random()*2+1,
     color:['#ff6a95','#ffe066','#6a8cff','#ff9a9e','#a0e7e5'][Math.floor(Math.random()*5)]
   });
 }
-
 function animateConfetti(){
   confCtx.clearRect(0,0,confettiCanvas.width,confettiCanvas.height);
   confettiPieces.forEach(p=>{
     confCtx.fillStyle=p.color;
     confCtx.fillRect(p.x,p.y,p.size,p.size);
-    p.y += p.speed;
-    if(p.y > confettiCanvas.height){p.y=0; p.x=Math.random()*confettiCanvas.width;}
+    p.y+=p.speed;
+    if(p.y>confettiCanvas.height){p.y=0; p.x=Math.random()*confettiCanvas.width;}
   });
   requestAnimationFrame(animateConfetti);
 }
 animateConfetti();
 
-// ===== Resize Canvas on Window Resize =====
-window.addEventListener('resize', ()=>{
-  confettiCanvas.width = window.innerWidth;
-  confettiCanvas.height = window.innerHeight;
-});
+// ===== Fireworks =====
+const fwCanvas=document.getElementById('fireworks');
+const fwCtx=fwCanvas.getContext('2d');
+fwCanvas.width=window.innerWidth;
+fwCanvas.height=window.innerHeight;
+
+class Particle{
+  constructor(x,y,color){
+    this.x=x; this.y=y; this.color=color;
+    this.vx=Math.random()*6-3; this.vy=Math.random()*-5-1; this.alpha=1;
+  }
+  update(){ this.x+=this.vx; this.y+=this.vy; this.alpha-=0.02; }
+  draw(){ fwCtx.globalAlpha=this.alpha; fwCtx.fillStyle=this.color; fwCtx.fillRect(this.x,this.y,4,4); }
+}
+let particles=[];
+function createFirework(){
+  const x=Math.random()*fwCanvas.width;
+  const y=Math.random()*fwCanvas.height/2;
+  const colors=['#ff6a95','#ffe066','#6a8cff','#ff9a9e','#a0e7e5'];
+  for(let i=0;i<50;i++) particles.push(new Particle(x,y,colors[Math.floor(Math.random()*colors.length)]));
+}
+function animateFireworks(){
+  fwCtx.fillStyle='rgba(0,0,0,0.1)';
+  fwCtx.fillRect(0,0,fwCanvas.width,fwCanvas.height);
+  particles.forEach((p,i)=>{ p.update(); p.draw(); if(p.alpha<=0) particles.splice(i,1); });
+  requestAnimationFrame(animateFireworks);
+}
+animateFireworks();
+function fireworkInterval(){ setInterval(createFirework,500); }
+
+// ===== Resize =====
+window.addEventListener('resize',()=>{confettiCanvas.width=fwCanvas.width=window.innerWidth; confettiCanvas.height=fwCanvas.height=window.innerHeight;});
 </script>
 
 </body>
