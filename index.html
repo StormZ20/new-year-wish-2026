@@ -15,11 +15,11 @@ body {
   margin:0;
   height:100vh;
   display:flex;
-  justify-content:center; /* horizontal center */
-  align-items:center;     /* vertical center */
+  justify-content:center;
+  align-items:center;
   overflow:hidden;
   text-align:center;
-  flex-direction:column; /* stack elements vertically */
+  flex-direction:column;
 }
 
 h1 {
@@ -28,11 +28,18 @@ h1 {
   margin-bottom:0.5em;
 }
 
+#countdown-container {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin-bottom:1em;
+}
+
 p#countdown {
   font-size:2.5em;
   text-shadow: 0 0 15px #fff, 0 0 25px #ff6a95, 0 0 35px #ff6a95, 0 0 50px #ff6a95;
   animation: glow 1.5s infinite alternate;
-  margin-bottom:1em;
+  margin:0;
 }
 
 @keyframes glow {
@@ -51,7 +58,13 @@ input, button {
 button { background:#fff; color:#ff6a95; font-weight:bold; cursor:pointer; }
 button:hover { background:#ff6a95; color:#fff; }
 
-#muteBtn { position:absolute; top:20px; right:20px; z-index:1; }
+#muteBtn {
+  position: relative;
+  margin-left:10px;
+  display:inline-block;
+  vertical-align:middle;
+}
+
 canvas { position:absolute; top:0; left:0; z-index:0; pointer-events:none; }
 #content { display:none; position:relative; z-index:1; }
 </style>
@@ -65,13 +78,14 @@ canvas { position:absolute; top:0; left:0; z-index:0; pointer-events:none; }
 </div>
 
 <div id="content">
-  <p id="countdown"></p>
+  <div id="countdown-container">
+    <p id="countdown"></p>
+    <button id="muteBtn">🔊 Mute</button>
+  </div>
   <input id="nameInput" placeholder="Type your name">
   <button id="celebrateBtn">Celebrate!</button>
-  <button id="muteBtn">🔊 Mute</button>
 </div>
 
-<!-- Your manual music file -->
 <audio id="bgMusic" loop>
   <source src="music.mp3" type="audio/mpeg">
 </audio>
