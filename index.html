@@ -28,7 +28,7 @@
 <p id="countdown">Loading countdown...</p>
 
 <input id="nameInput" placeholder="Type your name">
-<button onclick="personalize()">Celebrate!</button>
+<button id="celebrateBtn">Celebrate!</button>
 
 <button id="muteBtn" onclick="toggleMusic()">🔊 Mute</button>
 
@@ -54,21 +54,29 @@ function updateCountdown() {
 setInterval(updateCountdown, 1000);
 updateCountdown();
 
-// ===== Personal Greeting =====
-function personalize() {
-  const name = document.getElementById('nameInput').value;
-  if(name) document.getElementById('greeting').innerText = `🎉 Happy New Year 2026, ${name}! 🎉`;
-}
-
 // ===== Music Control =====
 const music = document.getElementById('bgMusic');
-music.play().catch(()=>{}); // autoplay may be blocked
-let muted=false;
+let musicStarted = false;
+let muted = false;
+
 function toggleMusic(){
-  muted=!muted;
+  if (!musicStarted) music.play().catch(()=>{});
+  muted = !muted;
   music.muted = muted;
   document.getElementById('muteBtn').innerText = muted ? "🔇 Unmute" : "🔊 Mute";
 }
+
+// ===== Personal Greeting + Start Music =====
+document.getElementById('celebrateBtn').addEventListener('click', ()=>{
+  // Start music on first interaction
+  if(!musicStarted){
+    music.play().catch(()=>{});
+    musicStarted = true;
+  }
+  // Update greeting
+  const name = document.getElementById('nameInput').value;
+  if(name) document.getElementById('greeting').innerText = `🎉 Happy New Year 2026, ${name}! 🎉`;
+});
 
 // ===== Confetti =====
 const confettiCanvas = document.getElementById('confetti');
@@ -100,6 +108,12 @@ function animateConfetti(){
   requestAnimationFrame(animateConfetti);
 }
 animateConfetti();
+
+// ===== Resize Canvas on Window Resize =====
+window.addEventListener('resize', ()=>{
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+});
 </script>
 
 </body>
